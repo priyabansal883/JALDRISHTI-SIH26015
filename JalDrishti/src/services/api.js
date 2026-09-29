@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const api = axios.create({
-  baseURL: "https://jaldrishti-backend-qx5z.onrender.com/api",
+  baseURL: "https://jaldrishti-backend-qx5z.onrender.com",
 });
 
 // Automatically attach JWT to requests
