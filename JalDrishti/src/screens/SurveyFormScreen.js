@@ -142,7 +142,23 @@ export default function SurveyFormScreen({
     }
   };
 
+// ======================================================
+// FETCH BEFORE / AFTER COMPARISON
+// ======================================================
 
+const fetchComparison = async (projectId) => {
+  try {
+    const response = await api.get(`/surveys/comparison/${projectId}`);
+    console.log("Comparison response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.log(
+      "Comparison fetch failed:",
+      error.response?.data || error.message
+    );
+    return null;
+  }
+};
   // ======================================================
   // COMPLETE TASK
   // ======================================================
@@ -540,6 +556,7 @@ export default function SurveyFormScreen({
             );
           }
         }
+        const comparison = await fetchComparison(projectId);
 
         // ==================================================
         // SUCCESS MESSAGE
@@ -570,6 +587,28 @@ export default function SurveyFormScreen({
           }
         }
 
+const arrow = (n) => (n > 0 ? "▲" : n < 0 ? "▼" : "•");
+const signed = (n) => (n > 0 ? `+${n}` : `${n}`);
+
+if (comparison?.available) {
+  const c = comparison.changes || {};
+
+  successMessage += `\n\n📊 BEFORE vs ${comparison.after.surveyType}`;
+  successMessage += `\nImpact: ${comparison.before.impactScore} → ${comparison.after.impactScore} (${arrow(c.impactScore)} ${signed(c.impactScore)})`;
+  successMessage += `\nWater: ${arrow(c.water)} ${signed(c.water)}`;
+  successMessage += `\nRetention: ${arrow(c.retention)} ${signed(c.retention)}`;
+  successMessage += `\nVegetation: ${arrow(c.vegetation)} ${signed(c.vegetation)}%`;
+  successMessage += `\nStructure: ${arrow(c.structure)} ${signed(c.structure)}`;
+  successMessage += `\nMaintenance: ${arrow(c.maintenance)} ${signed(c.maintenance)}`;
+
+  if (c.satelliteNDVI !== null && c.satelliteNDVI !== undefined) {
+    successMessage += `\nSatellite NDVI: ${arrow(c.satelliteNDVI)} ${signed(c.satelliteNDVI)}`;
+  }
+
+  successMessage += `\n\nResult: ${comparison.performance}`;
+} else if (comparison?.message) {
+  successMessage += `\n\n📊 ${comparison.message}`;
+}
         // ==================================================
         // SUCCESS ALERT
         // ==================================================
